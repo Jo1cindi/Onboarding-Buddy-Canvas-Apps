@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<manifest>
+  <control namespace="Onboarding" constructor="LandingPage" version="0.0.1"
+           display-name-key="LandingPage" description-key="LandingPage description"
+           control-type="virtual">
+
+    <external-service-usage enabled="false" />
+
+    <!-- ── Navigation output ──────────────────────────────────────────
+         Read this in Canvas Apps on the control's OnChange:
+         If(LandingPage1.NavigateTo = "OpenConsole", Navigate(ConsoleScreen, ScreenTransition.Fade))
+    ─────────────────────────────────────────────────────────────────── -->
+    <property name="NavigateTo"
+              display-name-key="NavigateTo"
+              description-key="The screen to navigate to when a button is clicked"
+              of-type="SingleLine.Text"
+              usage="output"
+              required="false" />
+
+    <!-- ── Dynamic stat inputs ────────────────────────────────────────
+         Bind each one in Canvas Apps Studio to a Power Fx formula, e.g.:
+           NewHiresCount    → CountRows(Filter(NewHires, ...))
+           ResponsesCount   → CountRows(Filter(SurveyResponses, ...))
+           BuddyRate        → Round(buddied / total * 100, 0)
+           ExceptionsCount  → CountRows(Filter(Exceptions, Status = "Open"))
+    ─────────────────────────────────────────────────────────────────── -->
+    <property name="NewHiresCount"
+              display-name-key="New Hires This Week"
+              description-key="Count of new hires onboarded this week"
+              of-type="Whole.None"
+              usage="input"
+              required="false" />
+
+    <property name="ResponsesCount"
+              display-name-key="New Responses Received"
+              description-key="Count of survey responses received this week"
+              of-type="Whole.None"
+              usage="input"
+              required="false" />
+
+    <property name="BuddyRate"
+              display-name-key="Buddy Rate"
+              description-key="Percentage of new hires assigned a buddy"
+              of-type="Whole.None"
+              usage="input"
+              required="false" />
+
+    <property name="ExceptionsCount"
+              display-name-key="Exceptions Open"
+              description-key="Count of currently open exceptions"
+              of-type="Whole.None"
+              usage="input"
+              required="false" />
+
+    <resources>
+      <code path="index.ts" order="1" />
+      <platform-library name="React" version="16.14.0" />
+      <platform-library name="Fluent" version="9.46.0" />
+    </resources>
+
+  </control>
+</manifest>
