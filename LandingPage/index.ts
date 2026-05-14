@@ -18,13 +18,16 @@ export class LandingPage implements ComponentFramework.ReactControl<IInputs, IOu
 
     public updateView(context: ComponentFramework.Context<IInputs>): React.ReactElement {
         return React.createElement(LandingPageView, {
-            width:  context.mode.allocatedWidth,
+            width: context.mode.allocatedWidth,
             height: context.mode.allocatedHeight,
 
-            newHiresCount:   context.parameters.NewHiresCount?.raw   ?? 0,
-            responsesCount:  context.parameters.ResponsesCount?.raw  ?? 0,
-            buddyRate:       context.parameters.BuddyRate?.raw       ?? 0,
+            newHiresCount: context.parameters.NewHiresCount?.raw ?? 0,
+            responsesCount: context.parameters.ResponsesCount?.raw ?? 0,
+            buddyRate: context.parameters.BuddyRate?.raw ?? 0,
             exceptionsCount: context.parameters.ExceptionsCount?.raw ?? 0,
+
+            currentWeek: context.parameters.CurrentWeek.raw ?? "April 12 – April 18, 2026",
+            lastSync: context.parameters.LastSync.raw ?? "4/29/2026",
 
             onButtonClick: (value: string) => {
                 this.navigateTo = value;

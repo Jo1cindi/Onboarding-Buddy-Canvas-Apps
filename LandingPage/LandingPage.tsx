@@ -18,11 +18,12 @@ import Banner from "./components/Banner";
 interface ILandingPageProps {
   width: number;
   height: number;
-  // Dynamic stats — bound to data in Canvas Apps
   newHiresCount:   number;
   responsesCount:  number;
   buddyRate:       number;
   exceptionsCount: number;
+  currentWeek: string;
+  lastSync: string;
   onButtonClick: (value: string) => void;
 }
 
@@ -66,10 +67,16 @@ const useStyles = makeStyles({
     border: "none !important", borderRadius: "8px !important",
     color: "white !important", cursor: "pointer",
     boxShadow: "0 0 24px rgba(0,120,212,0.35), 0 4px 12px rgba(0,0,0,0.4)",
-    transition: "all 0.2s ease",
+    // Smooth transition for all hover properties
+    transition: "box-shadow 0.25s ease, transform 0.25s ease, background 0.25s ease, filter 0.25s ease !important",
     ":hover": {
-      boxShadow: "0 0 36px rgba(0,120,212,0.55), 0 4px 16px rgba(0,0,0,0.5)",
-      transform: "translateY(-1px)",
+      boxShadow: "0 0 40px rgba(0,120,212,0.65), 0 0 20px rgba(192,59,196,0.4), 0 6px 20px rgba(0,0,0,0.5) !important",
+      transform: "translateY(-2px) scale(1.03)",
+      filter: "brightness(1.15)",
+    },
+    ":active": {
+      transform: "translateY(0px) scale(0.98)",
+      filter: "brightness(0.95)",
     },
   },
   statCell: {
@@ -127,43 +134,48 @@ const BP_CONFIG = {
 export const LandingPageView = ({
   width, height,
   newHiresCount, responsesCount, buddyRate, exceptionsCount,
+  currentWeek, lastSync,
   onButtonClick,
 }: ILandingPageProps) => {
-  const styles  = useStyles();
-  const bp      = getBreakpoint(width);
-  const cfg     = BP_CONFIG[bp];
+  const styles = useStyles();
+  const bp     = getBreakpoint(width);
+  const cfg    = BP_CONFIG[bp];
 
-  // Build the stats array from props — updates automatically when Canvas Apps data changes
   const STATS = [
-    { value: newHiresCount,   label: "New Hires This Week",  icon: <PeopleTeamRegular />,  color: "#0078d4", bg: "rgba(0,120,212,0.15)" },
-    { value: responsesCount,  label: "Responses Received",   icon: <MailInboxRegular />,   color: "#c03bc4", bg: "rgba(192,59,196,0.15)" },
-    { value: buddyRate,       label: "Buddy Rate",           icon: <PersonHeartRegular />, color: "#28c86e", bg: "rgba(40,200,110,0.15)" },
-    { value: exceptionsCount, label: "Exceptions Open",      icon: <AlertRegular />,       color: "#f7a23e", bg: "rgba(247,162,62,0.15)" },
+    { value: newHiresCount,   label: "New Hires This Week", icon: <PeopleTeamRegular />,  color: "#0078d4", bg: "rgba(0,120,212,0.15)" },
+    { value: responsesCount,  label: "Responses Received",  icon: <MailInboxRegular />,   color: "#c03bc4", bg: "rgba(192,59,196,0.15)" },
+    { value: buddyRate,       label: "Buddy Rate",          icon: <PersonHeartRegular />, color: "#28c86e", bg: "rgba(40,200,110,0.15)" },
+    { value: exceptionsCount, label: "Exceptions Open",     icon: <AlertRegular />,       color: "#f7a23e", bg: "rgba(247,162,62,0.15)" },
   ];
 
-  // ── Shared stat card ──
+  // ── Stat card — each cell fades in with a staggered delay ──
   const StatCard = () => (
     <div style={{
       width: cfg.cardWidth, borderRadius: "16px", overflow: "hidden",
       border: "1px solid rgba(255,255,255,0.08)", backgroundColor: "#454152",
       backdropFilter: "blur(24px)",
-      boxShadow: "0 24px 64px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08)",
+      boxShadow: "0 12px 40px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.08)",
       flexShrink: 0,
+      // Card itself fades + rises in
+      animation: "cardFadeIn 0.5s ease both",
     }}>
       <div style={{
         padding: "14px 16px", display: "flex", flexDirection: "column", gap: "2px",
         borderBottom: "1px solid rgba(255,255,255,0.07)", backgroundColor: "white",
       }}>
         <p style={{ color: "black", fontWeight: 600, fontSize: "14px", margin: 0 }}>This Week at a Glance</p>
-        <p style={{ color: "#454142", fontSize: "12px", margin: 0 }}>April 12 – April 18, 2026</p>
+        <p style={{ color: "#454142", fontSize: "12px", margin: 0 }}>{currentWeek}</p>
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
         {STATS.map((stat, i) => (
+          // Each stat cell fades in with a staggered delay based on its index
           <div key={i} className={styles.statCell} style={{
             padding: cfg.statPadding,
             borderRight: i % 2 === 0 ? "1px solid rgba(255,255,255,0.07)" : "none",
-            borderBottom: i < 2     ? "1px solid rgba(255,255,255,0.07)" : "none",
+            borderBottom: i < 2      ? "1px solid rgba(255,255,255,0.07)" : "none",
+            animation: `statFadeIn 0.4s ease both`,
+            animationDelay: `${0.15 + i * 0.1}s`,
           }}>
             <div className={styles.statIconWrap} style={{
               width: cfg.statIconBox, height: cfg.statIconBox,
@@ -171,8 +183,6 @@ export const LandingPageView = ({
             }}>
               {stat.icon}
             </div>
-
-            {/* Animated number — re-renders whenever the prop changes */}
             <h4 style={{
               color: "white", fontSize: cfg.statValueSize, fontWeight: 700,
               lineHeight: 1, letterSpacing: "-0.02em", margin: 0,
@@ -194,9 +204,11 @@ export const LandingPageView = ({
         borderTop: "1px solid rgba(255,255,255,0.07)",
         padding: cfg.footerPadding, display: "flex",
         alignItems: "center", justifyContent: "space-between",
+        animation: "statFadeIn 0.4s ease both",
+        animationDelay: "0.55s",
       }}>
         <p style={{ color: "rgba(200,200,215,0.4)", fontSize: cfg.footerFontSize, margin: 0 }}>
-          Last sync: {new Date().toLocaleDateString("en-GB")} {new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}
+          {lastSync}
         </p>
         <div className={styles.statusBadge}>
           <div className={styles.statusDot} />
@@ -206,7 +218,7 @@ export const LandingPageView = ({
     </div>
   );
 
-  // ── Shared heading block ──
+  // ── Heading block ──
   const Heading = ({ maxWidth }: { maxWidth?: string }) => (
     <>
       <h1 style={{ color: "white", fontWeight: 700, fontSize: cfg.headingSize, lineHeight: 1.1, margin: 0, letterSpacing: "-0.02em" }}>
@@ -244,9 +256,38 @@ export const LandingPageView = ({
     </>
   );
 
+  // ── Banner as pure background, card centered in sibling div ──
+  const BannerWithCenteredCard = ({ style }: { style: React.CSSProperties }) => (
+    <div style={{ position: "relative", ...style }}>
+      <Banner style={{ position: "absolute", inset: 0, width: "100%", height: "100%", borderRadius: 0 }} />
+      <div style={{
+        position: "absolute", inset: 0,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        zIndex: 2,
+      }}>
+        <StatCard />
+      </div>
+    </div>
+  );
+
   return (
     <FluentProvider theme={webDarkTheme}>
-      <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }`}</style>
+      <style>{`
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50%       { opacity: 0.4; }
+        }
+        /* Card container: fades in and rises up from 16px below */
+        @keyframes cardFadeIn {
+          from { opacity: 0; transform: translateY(16px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        /* Individual stat cells: fade in and rise from 8px */
+        @keyframes statFadeIn {
+          from { opacity: 0; transform: translateY(8px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
 
       <div className={styles.root} style={{ width, height, overflowY: bp === "mobile" ? "auto" : "hidden" }}>
         <div className={styles.bgGlow1} />
@@ -256,16 +297,15 @@ export const LandingPageView = ({
         {/* ── DESKTOP ── */}
         {bp === "desktop" && (
           <main style={{ display: "grid", gridTemplateColumns: "1fr 1fr", width: "100%", height: "100%", position: "relative", zIndex: 1 }}>
-            <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 56px 0 64px", position: "relative",
+            <div style={{
+              display: "flex", flexDirection: "column", justifyContent: "center",
+              padding: "0 56px 0 64px", position: "relative",
               borderLeft: "3px solid transparent", borderTop: "3px solid transparent",
-              borderImage: "linear-gradient(180deg,#0078d4,#c03bc4) 1", borderImageSlice: 1 }}>
+              borderImage: "linear-gradient(180deg,#0078d4,#c03bc4) 1", borderImageSlice: 1,
+            }}>
               <Heading />
             </div>
-            <Banner style={{ width: "100%", height: "100%", borderRadius: 0 }}>
-              <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <StatCard />
-              </div>
-            </Banner>
+            <BannerWithCenteredCard style={{ width: "100%", height: "100%" }} />
           </main>
         )}
 
@@ -277,18 +317,17 @@ export const LandingPageView = ({
                 <Heading maxWidth="480px" />
               </div>
             </div>
-            <Banner style={{ width: "100%", flex: 1, borderRadius: 0 }}>
-              <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", padding: "16px 24px 24px" }}>
-                <StatCard />
-              </div>
-            </Banner>
+            <BannerWithCenteredCard style={{ width: "100%", flex: 1 }} />
           </main>
         )}
 
         {/* ── MOBILE ── */}
         {bp === "mobile" && (
-          <main style={{ display: "flex", flexDirection: "column", width: "100%", minHeight: "100%",
-            position: "relative", zIndex: 1, padding: "32px 24px 40px", boxSizing: "border-box", gap: "24px" }}>
+          <main style={{
+            display: "flex", flexDirection: "column", width: "100%", minHeight: "100%",
+            position: "relative", zIndex: 1, padding: "32px 24px 40px",
+            boxSizing: "border-box", gap: "24px",
+          }}>
             <Heading />
             <StatCard />
           </main>
