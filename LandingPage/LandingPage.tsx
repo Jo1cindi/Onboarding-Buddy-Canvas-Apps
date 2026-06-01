@@ -222,7 +222,7 @@ export const LandingPageView = ({
   const Heading = ({ maxWidth }: { maxWidth?: string }) => (
     <>
       <h1 style={{ color: "white", fontWeight: 700, fontSize: cfg.headingSize, lineHeight: 1.1, margin: 0, letterSpacing: "-0.02em" }}>
-        Onboarding Buddy
+        MCAPS Onboarding Buddy
       </h1>
       <h1 style={{
         fontSize: cfg.headingSize, fontWeight: 700, lineHeight: 1.1,

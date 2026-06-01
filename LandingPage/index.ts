@@ -5,7 +5,7 @@ import "./tailwind.out.css";
 
 export class LandingPage implements ComponentFramework.ReactControl<IInputs, IOutputs> {
     private notifyOutputChanged: () => void;
-    private navigateTo = "";  // fix 1: removed redundant `: string` type annotation
+    private navigateTo = "";
 
     public init(
         context: ComponentFramework.Context<IInputs>,
@@ -26,12 +26,14 @@ export class LandingPage implements ComponentFramework.ReactControl<IInputs, IOu
             buddyRate: context.parameters.BuddyRate?.raw ?? 0,
             exceptionsCount: context.parameters.ExceptionsCount?.raw ?? 0,
 
-            currentWeek: context.parameters.CurrentWeek.raw ?? "April 12 – April 18, 2026",
-            lastSync: context.parameters.LastSync.raw ?? "4/29/2026",
+            currentWeek: context.parameters.CurrentWeek.raw ?? "",
+            lastSync: context.parameters.LastSync.raw ?? "",
 
             onButtonClick: (value: string) => {
                 this.navigateTo = value;
                 this.notifyOutputChanged();
+
+                // Reset after Canvas has read the value
                 setTimeout(() => {
                     this.navigateTo = "";
                     this.notifyOutputChanged();
@@ -42,11 +44,11 @@ export class LandingPage implements ComponentFramework.ReactControl<IInputs, IOu
 
     public getOutputs(): IOutputs {
         return {
-            NavigateTo: this.navigateTo,
+            NavigateTo: this.navigateTo
         };
     }
 
     public destroy(): void {
-        // fix 2: no-empty-function — comment satisfies the rule
+        // no-op
     }
 }
